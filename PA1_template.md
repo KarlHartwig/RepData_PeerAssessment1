@@ -6,17 +6,22 @@ output:
 ---
 
 <!--- Set up working directory -->
-```{r echo=FALSE}
-setwd("C:/Users/karl_/CourseraRprogramming/RepData_PeerAssessment1")
-```
+
 
 ## Loading and preprocessing the data
-```{r echo=TRUE}
+
+```r
 # load libraries
 suppressMessages(library(ggplot2))
 suppressMessages(library(lubridate))
 suppressMessages(library(mice))
+```
 
+```
+## Warning: package 'mice' was built under R version 3.4.3
+```
+
+```r
 # Unzip File
 unzip("activity.zip")
 
@@ -25,12 +30,12 @@ data<-read.csv("activity.csv",stringsAsFactors=FALSE)
 
 # convert date to correct data type
 data$date<-as.Date(data$date)
-
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r echo=TRUE}
+
+```r
 # Calculate steps per day
 TotPerDay<-aggregate(data$steps,by=list(data$date),FUN=sum,na.rm=TRUE)
 colnames(TotPerDay)<-c("date","steps")
@@ -38,12 +43,12 @@ colnames(TotPerDay)<-c("date","steps")
 # calculate mean and median of steps per day
 MeanStep<-mean(TotPerDay$steps,na.rm=TRUE)
 MedianStep<-median(TotPerDay$steps,na.rm=TRUE)
-
 ```
 
-As can be seen from the figure below the mean total number of steps per day is `r round(MeanStep)` steps, while the median total number of steps per day is `r as.integer(round(MedianStep))` steps.
+As can be seen from the figure below the mean total number of steps per day is 9354 steps, while the median total number of steps per day is 10395 steps.
 
-```{r echo=TRUE}
+
+```r
 # Create Histogram plot
 with(TotPerDay,hist(steps,main="Steps per Day",col="deepskyblue4",breaks=10))
 
@@ -60,15 +65,16 @@ legend(x="topright",
            paste0("Mean: ", round(MeanStep), " steps/day"),
            paste0("Median: ", round(MedianStep), " steps/day")),
        cex=0.9)
-   
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 
 
 ## What is the average daily activity pattern?
 
-```{r echo=TRUE}
+
+```r
 # Calculate mean number of steps per interval for the dataset
 ActivityPattern<-aggregate(
     data$steps,
@@ -80,9 +86,10 @@ colnames(ActivityPattern)<-c("interval","steps")
 maxInterval<-ActivityPattern[which.max(ActivityPattern$steps),]
 ```
 
-The 5-minute interval that has on average the maximum number of steps is interval `r maxInterval$interval`, with an average number of steps of `r as.integer(round(maxInterval$steps))`.
+The 5-minute interval that has on average the maximum number of steps is interval 835, with an average number of steps of 206.
 
-```{r echo=TRUE}
+
+```r
 # Plot line time series of average steps
 with(ActivityPattern,
      plot(interval,steps,type="l")
@@ -96,19 +103,20 @@ text(x=maxInterval$interval+700,
      y=maxInterval$steps,
      labels=paste0("Maximum steps occurs during interval ",maxInterval$interval)
      )
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ## Imputing missing values
 
-```{r echo=TRUE}
+
+```r
 # Calculate and report the total number of missing values in the dataset 
 # (i.e. the total number of rows with NAs)
 NumberOfMissing<-sum(is.na(data$steps))
-
 ```
 
-The total number of missing values in the dataset is `r NumberOfMissing`.
+The total number of missing values in the dataset is 2304.
 
 Predivtive mean matching is applied through the mice package to fill all of the missing values in the dataset. 
 
@@ -116,7 +124,8 @@ In order for the mice package to perform correctly the date column is temporaril
 
 Five imputations are performed to see the level of stability in the produced missing value estimation.
 
-```{r echo=TRUE}
+
+```r
 # convert date class to integer for imputation as the mice package
 # cannot handle date variables
 data$date<-as.integer(data$date)
@@ -144,16 +153,16 @@ TotPerDayImputed<-lapply(1:5,function(i){
 # calculate mean and median of steps per day
 MeanStepImpute<-sapply(1:5,function(i)mean(TotPerDayImputed[[i]]$steps,na.rm=TRUE))
 MedianStepImpute<-sapply(1:5,function(i)median(TotPerDayImputed[[i]]$steps,na.rm=TRUE))
-
 ```
 
-Days with low total steps decrease significantly after missing values have been replace through imputation. The mean total number of steps per day is increased from `r as.integer(round(MeanStep))` to between `r as.integer(round(min(MeanStepImpute)))` and `r as.integer(round(max(MeanStepImpute)))`, whereas the median is increased from `r as.integer(round(MedianStep))` to between `r as.integer(round(min(MedianStepImpute)))` and `r as.integer(round(max(MedianStepImpute)))` depending on imputation.
+Days with low total steps decrease significantly after missing values have been replace through imputation. The mean total number of steps per day is increased from 9354 to between 10573 and 11113, whereas the median is increased from 10395 to between 10571 and 11162 depending on imputation.
 This is expected as days with missing values should have a lower total count compared to days with complete data.
 
 The distribution of total steps per day differ between the imputed data sets, however all of them have a distribution closer to normal compared to the original dataset which had large proportion of days in the region of less than 2500 steps/day.
 
 
-```{r echo=TRUE}
+
+```r
 # plot histogram of the original data
 par(mfrow=c(2,3))
 with(TotPerDay,hist(steps,main="Original Data",col="coral4",breaks=10))
@@ -168,17 +177,19 @@ with(TotPerDayImputed,
     with(TotPerDayImputed[[i]],hist(steps,main=paste0("Imputed Dataset: ",i),col="deepskyblue4",breaks=10))
 )
 }
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
 # reset plotting frame
 par(mfrow=c(1,1))
-
-
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=TRUE}
 
+```r
 # Create a new factor variable in the dataset with two levels -- "weekday" and 
 # "weekend" indicating whether a given date is a weekday or weekend day.
 WDayData<-lapply(1:5,function(i){
@@ -208,7 +219,6 @@ PatternWeekday<-lapply(1:5,function(i){
         return(data)
         }
     )
-
 ```
 
 Weekdays see a more pronounced peak in steps taken during the morning. This is most likely due to people walking to work.
@@ -218,7 +228,8 @@ On the other hand the activity pattern during weekends seems to be more evenly d
 The difference in demand pattern between diffrent imputation is more pronounced during weekends as these constitute fewer days and hence the proportion of NAs replaced are larger compared to the total number of intervals.
 
 
-```{r echo=TRUE}
+
+```r
 # Plot line time series of average steps
 for(i in 1:5){
     print(
@@ -226,9 +237,9 @@ for(i in 1:5){
         geom_line()+ facet_grid( weekday ~ .)
         )
 }
-
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-11-2.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-11-3.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-11-4.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-11-5.png)<!-- -->
  
  
  
